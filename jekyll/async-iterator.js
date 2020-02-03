@@ -22,4 +22,4 @@ export default function asyncIterator (items, asyncProcessor, batchSize = 1) {
 			return Promise.resolve(results);
 		};
 	return processNextOrResolve();
-};
+}

@@ -30,7 +30,14 @@ web-config.yml: output.yml
 		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE) \
 		--query Stacks[].Outputs[] --output text | awk '//{print $$1 ": " $$2}' > $@
 
-web: web-config.yml
+node_modules/aws-sdk/dist/aws-sdk.min.js:
+	npm install
+
+jekyll/vendor/aws-sdk.min.js: node_modules/aws-sdk/dist/aws-sdk.min.js
+	mkdir -p jekyll/vendor
+	cp $< $@
+
+web: web-config.yml jekyll/vendor/aws-sdk.min.js
 	jekyll serve -s jekyll -c $<
 
 clean:

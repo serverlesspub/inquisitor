@@ -2,3 +2,6 @@
 output.yml
 web-config.yml
 _site
+node_modules
+jekyll/vendor
+package-lock.json
