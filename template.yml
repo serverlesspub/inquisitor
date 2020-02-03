@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Responsive Serverless Test Stack
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  StageName:
+    Type: String
+    Default: "test"
+
+Resources:
+  RegionalRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      EndpointConfiguration: Regional
+      StageName: !Ref StageName
+
+  EdgeRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      EndpointConfiguration: Edge
+      StageName: !Ref StageName
+
+  SyncTestFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda.handler
+      Runtime: nodejs12.x
+      CodeUri: sync-test-function
+      Events:
+        RegionalApiGet:
+          Type: Api
+          Properties:
+            Method: get
+            Path: /regional
+            RestApiId: !Ref RegionalRestApi
+        EdgeApiGet:
+          Type: Api
+          Properties:
+            Method: get
+            Path: /edge
+            RestApiId: !Ref EdgeRestApi
+Outputs:
+  RegionalApiUrl:
+    Value: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
+  EdgeApiUrl:
+    Value: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
+
