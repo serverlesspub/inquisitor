@@ -20,19 +20,23 @@ deploy: output.yml
 	--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE)
 	#--parameter-overrides $(STACK_NAME)
 
-describe:
-	aws cloudformation  describe-stacks \
-		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE) \
-		--query Stacks[].Outputs[] --output text
 
 logs:
 	sam logs --stack-name $(STACK_NAME) -n SyncTestFunction \
 		--region $(AWS_REGION) --profile $(AWS_PROFILE)
 
+web-config.yml: output.yml
+	aws cloudformation  describe-stacks \
+		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE) \
+		--query Stacks[].Outputs[] --output text | awk '//{print $$1 ": " $$2}' > $@
+
+web: web-config.yml
+	jekyll serve -s jekyll -c $<
+
 clean:
-	rm -f output.yml
+	rm -f output.yml web-config.yml
 	aws cloudformation delete-stack \
 		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE)
 
-.PHONY: deploy deployment-bucket clean logs
+.PHONY: deploy deployment-bucket clean logs web
 

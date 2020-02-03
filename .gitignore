@@ -1,2 +1,4 @@
 .env
 output.yml
+web-config.yml
+_site
