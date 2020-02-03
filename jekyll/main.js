@@ -21,48 +21,63 @@ const getParams = function ()  {
 			localStorage[input.getAttribute('name')] = input.value;
 		});
 	},
-	runOne = async function (index, label, testType, target) {
-		if (index % 100 === 0) {
-			console.log(index, label, testType, target);
-		}
+	testEngines = {
+		api: (target) => fetch(target, {mode: 'cors'})
+	},
+	runOne = async function (index, testType, target) {
 		try {
 			const startTs = Date.now(),
-				result = await fetch(target, {mode: 'cors'}),
+				result = await testEngines[testType](target),
 				endTs = Date.now();
 			return endTs - startTs;
 		} catch (e) {
 			return 0;
 		}
 	},
-	runTest = async function (label, testType, target, params) {
-		saveInputs();
-		console.log(label, testType, target, params);
+	runTest = async function (testType, target, params, reporter) {
 		const requestCount = parseInt(params.requestCount),
 			batchSize = parseInt(params.batchSize),
 			requestArray = new Array(requestCount).fill(' ').map((v, k) => k),
-			results = await asyncIterator(requestArray, idx => runOne (idx, label, testType, target), batchSize),
+			predicate =  index => {
+				reporter(`${index} of  ${requestCount}`);
+				return runOne (index, testType, target);
+			},
+			results = await asyncIterator(requestArray, predicate, batchSize),
 			successful = results.filter(i => i).sort(),
-			total = successful.length && successful.reduce((a, c) => a + c),
-			average = total && total/successful.length,
-			sixFive = successful[Math.floor(successful.length * 0.65)],
-			nineFive = successful[Math.floor(successful.length * 0.95)];
-		console.log(label,
-			'completed', successful.length,
-			'failed', requestCount - successful.length,
-			'average', average, 'ms',
-			'65% <', sixFive, 'ms',
-			'95% <', nineFive, 'ms');
+			total = successful.length && successful.reduce((a, c) => a + c);
+		return {
+			completed: successful.length,
+			failed: requestCount - successful.length,
+			average: total && total/successful.length,
+			sixFive: successful[Math.floor(successful.length * 0.65)],
+			nineFive: successful[Math.floor(successful.length * 0.95)],
+			min: successful[0]
+		}
 	},
 	init = function () {
 		console.log('init');
-		const buttons = Array.from(document.querySelectorAll('button[test-type]'));
+		const buttons = Array.from(document.querySelectorAll('button[test-type]')),
+			reporter = document.querySelector('[role=reporter]');
 		buttons.forEach(button => {
-			button.addEventListener('click', () => runTest(
-				button.getAttribute('label'),
-				button.getAttribute('test-type'),
-				button.getAttribute('target'),
-				getParams()
-			));
+			button.addEventListener('click', async () => {
+				const label = button.getAttribute('label'),
+					result = await runTest(
+						button.getAttribute('test-type'),
+						button.getAttribute('target'),
+						getParams(),
+						message => reporter.innerHTML = message
+					);
+				saveInputs();
+				console.log(label, JSON.stringify(result));
+				reporter.innerHTML = `
+					<h3>${label}</h3>
+					completed: ${result.completed}<br/>
+					failed: ${result.failed}<br/>
+					average: ${result.average}ms<br/>
+					65% ${result.min}ms - ${result.sixFive}ms<br/>
+					95% ${result.min}ms - ${result.nineFive}ms<br/>
+				`;
+			});
 		});
 		readInputs();
 	};
