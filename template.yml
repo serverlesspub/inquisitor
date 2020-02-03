@@ -41,9 +41,58 @@ Resources:
             Method: get
             Path: /edge
             RestApiId: !Ref EdgeRestApi
+
+  IdentityPool:
+    Type: "AWS::Cognito::IdentityPool"
+    Properties:
+      AllowUnauthenticatedIdentities: true
+
+  CognitoUnAuthorizedRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal: 
+              Federated: "cognito-identity.amazonaws.com"
+            Action: 
+              - "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals: 
+                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+              "ForAnyValue:StringLike":
+                "cognito-identity.amazonaws.com:amr": unauthenticated
+      Policies:
+        - PolicyName: "CognitoUnauthorizedPolicy"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: "Allow"
+                Action:
+                  - "cognito-sync:*"
+                Resource: "*"
+              - Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:
+                  - !GetAtt SyncTestFunction.Arn
+
+  IdentityPoolRoleMapping:
+    Type: "AWS::Cognito::IdentityPoolRoleAttachment"
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        authenticated: !GetAtt CognitoUnAuthorizedRole.Arn
+        unauthenticated: !GetAtt CognitoUnAuthorizedRole.Arn
+
 Outputs:
   RegionalApiUrl:
-    Value: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
+    Value: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
   EdgeApiUrl:
-    Value: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
-
+    Value: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/edge"
+  SyncTestFunction:
+    Value: !Ref SyncTestFunction
+  Region:
+    Value: !Sub "${AWS::Region}"
+  IdentityPool:
+    Value: !Ref IdentityPool
