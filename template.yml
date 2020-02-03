@@ -13,12 +13,14 @@ Resources:
     Properties:
       EndpointConfiguration: Regional
       StageName: !Ref StageName
+      Cors: "'*'"
 
   EdgeRestApi:
     Type: AWS::Serverless::Api
     Properties:
       EndpointConfiguration: Edge
       StageName: !Ref StageName
+      Cors: "'*'"
 
   SyncTestFunction:
     Type: 'AWS::Serverless::Function'
