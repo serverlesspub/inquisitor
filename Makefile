@@ -41,9 +41,11 @@ web: web-config.yml jekyll/vendor/aws-sdk.min.js
 	jekyll serve -s jekyll -c $<
 
 clean:
-	rm -f output.yml web-config.yml
+	rm -rf output.yml web-config.yml jekyll/vendor
+
+undeploy:
 	aws cloudformation delete-stack \
 		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE)
 
-.PHONY: deploy deployment-bucket clean logs web
+.PHONY: deploy deployment-bucket clean logs web undeploy
 

@@ -15,29 +15,38 @@ const getParams = function ()  {
 			const stored = localStorage[input.getAttribute('name')];
 			if (stored) {
 				input.value = stored;
-				console.log('loaded', input.getAttribute('name'), input.value);
 			}
 		});
 	},
 	saveInputs = function () {
 		const inputs = Array.from(document.querySelectorAll(variableParamsSelector));
 		inputs.forEach(input => {
-			console.log('saving', input.getAttribute('name'), input.value);
 			localStorage[input.getAttribute('name')] = input.value;
 		});
 	},
 	testEngines = {
-		api: (target) => fetch(target, {mode: 'cors'}),
+		api: (target) => fetch(target, {mode: 'cors'}).then(response => response.json()),
 		lambda: executeLambda
+	},
+	safeParse = (param) => {
+		if (!param) {
+			return {};
+		}
+		if (typeof param === 'string') {
+			return JSON.parse(param);
+		}
+		return param;
 	},
 	runOne = async function (index, testType, target) {
 		try {
-			const startTs = Date.now();
-			await testEngines[testType](target);
-			return Date.now() - startTs;
+			const startTs = Date.now(),
+				result = await testEngines[testType](target),
+				timing = Date.now() - startTs,
+				instance = safeParse(result).instance;
+			return { timing, instance };
 		} catch (e) {
 			console.error(e);
-			return 0;
+			return false;
 		}
 	},
 	intSort = function (a, b) {
@@ -49,23 +58,25 @@ const getParams = function ()  {
 			requestArray = new Array(requestCount).fill(' ').map((v, k) => k),
 			predicate = async index => {
 				const result = await runOne (index, testType, target);
-				reporter(`${index} of ${requestCount} => ${result}ms`);
+				reporter(`${index} of ${requestCount} => ${result && result.timing}ms`);
 				return result;
 			},
 			results = await asyncIterator(requestArray, predicate, batchSize),
-			successful = results.filter(i => i).sort(intSort),
-			total = successful.length && successful.reduce((a, c) => a + c);
+			successful = results.filter(i => i),
+			successTimings = successful.map(s => s.timing).sort(intSort),
+			instances = new Set(successful.map(s => s.instance)).size,
+			total = successTimings.length && successTimings.reduce((a, c) => a + c);
 		return {
 			completed: successful.length,
 			failed: requestCount - successful.length,
 			average: total && total/successful.length,
-			sixFive: successful[Math.floor(successful.length * 0.65)],
-			nineFive: successful[Math.floor(successful.length * 0.95)],
-			min: successful[0]
+			sixFive: successTimings[Math.floor(successful.length * 0.65)],
+			nineFive: successTimings[Math.floor(successful.length * 0.95)],
+			min: successTimings[0],
+			instances: instances
 		};
 	},
 	init = function () {
-		console.log('init');
 		const buttons = Array.from(document.querySelectorAll('button[test-type]')),
 			reporter = document.querySelector('[role=reporter]');
 		buttons.forEach(button => {
@@ -86,6 +97,7 @@ const getParams = function ()  {
 					average: ${result.average}ms<br/>
 					65% ${result.min}ms - ${result.sixFive}ms<br/>
 					95% ${result.min}ms - ${result.nineFive}ms<br/>
+					used ${result.instances} distinct instances
 				`;
 			});
 		});
