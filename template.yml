@@ -28,6 +28,10 @@ Resources:
       Handler: lambda.handler
       Runtime: nodejs12.x
       CodeUri: sync-test-function
+      MemorySize: 128
+      AutoPublishAlias: live
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 20
       Events:
         RegionalApiGet:
           Type: Api
@@ -75,7 +79,7 @@ Resources:
               - Effect: "Allow"
                 Action: "lambda:InvokeFunction"
                 Resource:
-                  - !GetAtt SyncTestFunction.Arn
+                  - !Ref SyncTestFunction.Alias
 
   IdentityPoolRoleMapping:
     Type: "AWS::Cognito::IdentityPoolRoleAttachment"
@@ -91,7 +95,8 @@ Outputs:
   EdgeApiUrl:
     Value: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/edge"
   SyncTestFunction:
-    Value: !Ref SyncTestFunction
+    # Value: !Ref SyncTestFunction
+    Value: !Ref SyncTestFunction.Alias
   Region:
     Value: !Sub "${AWS::Region}"
   IdentityPool:
