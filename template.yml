@@ -18,7 +18,7 @@ Resources:
       StageName: !Ref StageName
       Cors:
         AllowCredentials: "'true'"
-        AllowMethods: "'GET,OPTIONS'"
+        AllowMethods: "'GET,OPTIONS,POST'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
         AllowOrigin: "'*'"
         MaxAge: "'600'"
@@ -30,7 +30,7 @@ Resources:
       StageName: !Ref StageName
       Cors:
         AllowCredentials: "'true'"
-        AllowMethods: "'GET,OPTIONS'"
+        AllowMethods: "'GET,OPTIONS,POST'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
         AllowOrigin: "'*'"
         MaxAge: "'600'"
@@ -89,6 +89,12 @@ Resources:
           Type: Api
           Properties:
             Method: get
+            Path: /regional
+            RestApiId: !Ref RegionalRestApi
+        RegionalApiPost:
+          Type: Api
+          Properties:
+            Method: post
             Path: /regional
             RestApiId: !Ref RegionalRestApi
         EdgeApiGet:

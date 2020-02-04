@@ -26,6 +26,7 @@ const getParams = function ()  {
 	},
 	testEngines = {
 		api: (target) => fetch(target, {mode: 'cors'}).then(response => response.json()),
+		apiPost: (target) => fetch(target, {method: 'post', mode: 'cors'}).then(response => response.json()),
 		apikey: (target, params) => fetch(target, {mode: 'cors', headers: {'x-api-key': params.apiKey}}).then(response => response.json()),
 		lambda: executeLambda
 	},
