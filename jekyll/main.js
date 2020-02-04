@@ -26,7 +26,7 @@ const getParams = function ()  {
 	},
 	testEngines = {
 		api: (target) => fetch(target, {mode: 'cors'}).then(response => response.json()),
-		apikey: (target) => fetch(target, {mode: 'cors', headers: {'x-api-key': 'W9RWkqF1KW8YgVBhilnyU4l2xXBaGOrF9OolR7Ui'}}).then(response => response.json()),
+		apikey: (target, params) => fetch(target, {mode: 'cors', headers: {'x-api-key': params.apiKey}}).then(response => response.json()),
 		lambda: executeLambda
 	},
 	safeParse = (param) => {
@@ -38,10 +38,10 @@ const getParams = function ()  {
 		}
 		return param;
 	},
-	runOne = async function (index, testType, target) {
+	runOne = async function (index, testType, target, params) {
 		try {
 			const startTs = Date.now(),
-				result = await testEngines[testType](target),
+				result = await testEngines[testType](target, params),
 				timing = Date.now() - startTs,
 				instance = safeParse(result).instance;
 			return { timing, instance };
@@ -58,7 +58,7 @@ const getParams = function ()  {
 			batchSize = parseInt(params.batchSize),
 			requestArray = new Array(requestCount).fill(' ').map((v, k) => k),
 			predicate = async index => {
-				const result = await runOne (index, testType, target),
+				const result = await runOne (index, testType, target, params),
 					display = (result && result.timing) ? `${result.timing}ms` : 'error';
 				reporter(`${index} of ${requestCount} => ${display}`);
 				return result;
@@ -66,8 +66,9 @@ const getParams = function ()  {
 			results = await asyncIterator(requestArray, predicate, batchSize),
 			successful = results.filter(i => i),
 			successTimings = successful.map(s => s.timing).sort(intSort),
-			instances = new Set(successful.map(s => s.instance)).size,
+			instances = new Set(successful.map(s => s.instance)),
 			total = successTimings.length && successTimings.reduce((a, c) => a + c);
+		console.log('instances', instances);
 		return {
 			completed: successful.length,
 			failed: requestCount - successful.length,
@@ -75,7 +76,7 @@ const getParams = function ()  {
 			sixFive: successTimings[Math.floor(successful.length * 0.65)] || 0,
 			nineFive: successTimings[Math.floor(successful.length * 0.95)] || 0,
 			min: successTimings[0] || 0,
-			instances: instances
+			instances: instances.size
 		};
 	},
 	init = function () {

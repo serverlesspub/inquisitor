@@ -6,6 +6,9 @@ Parameters:
   StageName:
     Type: String
     Default: "test"
+  MemorySize:
+    Type: Number
+    Default: 128
 
 Resources:
   RegionalRestApi:
@@ -13,14 +16,63 @@ Resources:
     Properties:
       EndpointConfiguration: Regional
       StageName: !Ref StageName
-      Cors: "'*'"
+      Cors:
+        AllowCredentials: "'true'"
+        AllowMethods: "'GET,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
 
   EdgeRestApi:
     Type: AWS::Serverless::Api
     Properties:
       EndpointConfiguration: Edge
       StageName: !Ref StageName
-      Cors: "'*'"
+      Cors:
+        AllowCredentials: "'true'"
+        AllowMethods: "'GET,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
+
+  ApiUsagePlan:
+    Type: 'AWS::ApiGateway::UsagePlan'
+    DependsOn: 
+      - RegionalRestApiStage
+      - EdgeRestApiStage
+    Properties:
+      ApiStages:
+        - ApiId: !Ref RegionalRestApi
+          Stage: !Ref StageName
+        - ApiId: !Ref EdgeRestApi
+          Stage: !Ref StageName
+      Quota:
+        Limit: 10000
+        Period: DAY
+      Throttle:
+        BurstLimit: 2000
+        RateLimit: 1000
+      UsagePlanName: !Sub "${StageName}Plan"
+
+  ApiKey:
+    Type: 'AWS::ApiGateway::ApiKey'
+    DependsOn: 
+      - RegionalRestApiStage
+      - EdgeRestApiStage
+    Properties:
+      Enabled: true
+      StageKeys:
+        - RestApiId: !Ref RegionalRestApi
+          StageName: !Ref StageName
+        - RestApiId: !Ref EdgeRestApi
+          StageName: !Ref StageName
+
+  UsagePlanKey:
+    Type: 'AWS::ApiGateway::UsagePlanKey'
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref ApiUsagePlan
 
   SyncTestFunction:
     Type: 'AWS::Serverless::Function'
@@ -28,10 +80,10 @@ Resources:
       Handler: lambda.handler
       Runtime: nodejs12.x
       CodeUri: sync-test-function
-      MemorySize: 128
+      MemorySize: !Ref MemorySize
       AutoPublishAlias: live
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 20
+      #ProvisionedConcurrencyConfig:
+      #  ProvisionedConcurrentExecutions: 20
       Events:
         RegionalApiGet:
           Type: Api
@@ -45,6 +97,14 @@ Resources:
             Method: get
             Path: /edge
             RestApiId: !Ref EdgeRestApi
+        RegionalApiKeyGet:
+          Type: Api
+          Properties:
+            Method: get
+            Path: /regional-key
+            RestApiId: !Ref RegionalRestApi
+            Auth:
+              ApiKeyRequired: true
 
   IdentityPool:
     Type: "AWS::Cognito::IdentityPool"
@@ -92,6 +152,8 @@ Resources:
 Outputs:
   RegionalApiUrl:
     Value: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
+  RegionalKeyApiUrl:
+    Value: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional-key"
   EdgeApiUrl:
     Value: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/edge"
   SyncTestFunction:
@@ -101,3 +163,5 @@ Outputs:
     Value: !Sub "${AWS::Region}"
   IdentityPool:
     Value: !Ref IdentityPool
+  ApiKeyId:
+    Value: !Ref ApiKey
