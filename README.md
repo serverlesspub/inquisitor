@@ -2,14 +2,13 @@
 
 A simple app for testing request latency over API Gateway and Lambda functions.
 
-### Prerequisites
+## Prerequisites
 
 * npm
 * jekyll
 * make
 
-
-### Usage
+## Usage
 
 1. Create a `.env` file (it will be ignored by git) with the following two properties:
 
@@ -54,6 +53,7 @@ You can remove the deployed stack using `make undeploy STACK_NAME=perf-test`
 
 ## Customising
 
+* modify [sync-test-function/lambda.js](sync-test-function/lambda.js) to change the Lambda function source code 
 * modify [template.yml](template.yml) to change the Lambda function settings
 * modify `.env` to deploy to a different region
 
