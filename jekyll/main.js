@@ -26,6 +26,7 @@ const getParams = function ()  {
 	},
 	testEngines = {
 		api: (target) => fetch(target, {mode: 'cors'}).then(response => response.json()),
+		apikey: (target) => fetch(target, {mode: 'cors', headers: {'x-api-key': 'W9RWkqF1KW8YgVBhilnyU4l2xXBaGOrF9OolR7Ui'}}).then(response => response.json()),
 		lambda: executeLambda
 	},
 	safeParse = (param) => {
@@ -57,8 +58,9 @@ const getParams = function ()  {
 			batchSize = parseInt(params.batchSize),
 			requestArray = new Array(requestCount).fill(' ').map((v, k) => k),
 			predicate = async index => {
-				const result = await runOne (index, testType, target);
-				reporter(`${index} of ${requestCount} => ${result && result.timing}ms`);
+				const result = await runOne (index, testType, target),
+					display = (result && result.timing) ? `${result.timing}ms` : 'error';
+				reporter(`${index} of ${requestCount} => ${display}`);
 				return result;
 			},
 			results = await asyncIterator(requestArray, predicate, batchSize),
@@ -70,9 +72,9 @@ const getParams = function ()  {
 			completed: successful.length,
 			failed: requestCount - successful.length,
 			average: total && total/successful.length,
-			sixFive: successTimings[Math.floor(successful.length * 0.65)],
-			nineFive: successTimings[Math.floor(successful.length * 0.95)],
-			min: successTimings[0],
+			sixFive: successTimings[Math.floor(successful.length * 0.65)] || 0,
+			nineFive: successTimings[Math.floor(successful.length * 0.95)] || 0,
+			min: successTimings[0] || 0,
 			instances: instances
 		};
 	},

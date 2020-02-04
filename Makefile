@@ -1,7 +1,7 @@
 SHELL=/bin/sh
 CWD := $(shell pwd)
-STACK_NAME=responsive-sls-test
-DEPLOYMENT_BUCKET=$(STACK_NAME)-deployment-$(AWS_REGION)
+STACK_NAME ?= responsive-sls-test
+DEPLOYMENT_BUCKET ?= $(STACK_NAME)-deployment-$(AWS_REGION)
 include .env
 
 
@@ -29,7 +29,14 @@ web-config.yml: output.yml
 	aws cloudformation  describe-stacks \
 		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE) \
 		--query Stacks[].Outputs[] --output text | awk '//{print $$1 ": " $$2}' > $@
-
+	echo "ApiKey: " $(shell key=`aws cloudformation  describe-stacks \
+		--stack-name $(STACK_NAME) --region $(AWS_REGION) --profile $(AWS_PROFILE) \
+		--query "Stacks[].Outputs[?OutputKey=='ApiKeyId'].OutputValue" --output text`; \
+		aws apigateway get-api-keys --query "items[?id=='$$key'].value" \
+			--include-values \
+			--region $(AWS_REGION) --profile $(AWS_PROFILE) \
+			--output text \
+	) >> $@
 node_modules/aws-sdk/dist/aws-sdk.min.js:
 	npm install
 
