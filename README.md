@@ -2,8 +2,7 @@
 
 A simple app for testing request latency over API Gateway and Lambda functions.
 
-
-## Prerequisites
+## Prerequisites
 
 * npm
 * jekyll
