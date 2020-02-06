@@ -25,7 +25,7 @@ const getParams = function ()  {
 		});
 	},
 	testEngines = {
-		api: (target) => fetch(target, {mode: 'cors'}).then(response => response.json()),
+		api: (target, params, index) => fetch(`${target}?timestamp=${Date.now()}&index=${index}`, {mode: 'cors'}).then(response => response.json()),
 		apiPost: (target) => fetch(target, {method: 'post', mode: 'cors'}).then(response => response.json()),
 		apikey: (target, params) => fetch(target, {mode: 'cors', headers: {'x-api-key': params.apiKey}}).then(response => response.json()),
 		lambda: executeLambda
@@ -42,7 +42,7 @@ const getParams = function ()  {
 	runOne = async function (index, testType, target, params) {
 		try {
 			const startTs = Date.now(),
-				result = await testEngines[testType](target, params),
+				result = await testEngines[testType](target, params, index),
 				timing = Date.now() - startTs,
 				instance = safeParse(result).instance;
 			return { timing, instance };
