@@ -1,17 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Responsive Serverless Test Stack
+Description: >
+  Serverless Inquisitor, a simple app for testing latency
+  between client devices, API Gateway and Lambda functions
 Transform: AWS::Serverless-2016-10-31
-
 Parameters:
   StageName:
     Type: String
     Default: "test"
+    Description: API Stage name
   MemorySize:
     Type: Number
     Default: 128
+    Description: Memory limit for the test Lambda function
   ProvisionedInstances:
     Type: Number
     Default: 0
+    Description: >
+      Number of provisioned instances of the test Lambda function. Leave as 0 for no provisioned instances.
 Conditions:
   ProvisionedInstancesSet: !Not [ !Equals [0, !Ref ProvisionedInstances]]
 Resources:
@@ -201,7 +206,7 @@ Resources:
         Values:
           StackId: !Ref AWS::StackId
           Region: !Ref AWS::Region
-          IdentityPoolId: IdentityPool
+          IdentityPoolId: !Ref IdentityPool
           ApiKeyId: !Ref ApiKey
           RegionalApiUrl: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
           RegionalKeyApiUrl: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional-key"
@@ -211,5 +216,18 @@ Resources:
 Outputs:
   WebSiteUrl:
     Value: !GetAtt WebsiteBucket.WebsiteURL
-  ApiKeyId:
-    Value: !Ref ApiKey
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: inquisitor 
+    Description: >
+      Serverless Inquisitor, a simple app for testing latency
+      between client devices, API Gateway and Lambda functions
+    Author: Gojko Adzic
+    SpdxLicenseId: MIT 
+    LicenseUrl: LICENSE.txt
+    ReadmeUrl: README-SAR.md 
+    Labels: ['testing']
+    HomePageUrl: https://github.com/serverlesspub/inquisitor
+    SemanticVersion: 1.0.1
+    SourceCodeUrl: https://github.com/serverlesspub/inquisitor

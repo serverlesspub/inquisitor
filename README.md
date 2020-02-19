@@ -2,12 +2,16 @@
 
 A simple app for testing request latency over API Gateway and Lambda functions.
 
-## Prerequisites
+The easiest way to deploy is directly from the [Serverless App Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:145266761615:applications~inquisitor). Check out the stack outputs after deployment for the web site URL, and open that URL in the browser to run your tests.
+
+For manual deployment, without the Serverless App repository, and customisation options, see below:
+
+## Manual deployment Prerequisites
 
 * npm
 * make
 
-## Usage
+## Manual deployment
 
 1. deploy the stack using `make deploy`
 
@@ -42,3 +46,6 @@ You can remove the deployed stack using `make undeploy` (make sure to add `STACK
 * modify [template.yml](template.yml) to change the Lambda function settings
 * modify [web-site/index.html](web-site/index.html) to change the web site landing page 
 
+## License
+
+MIT, see [LICENSE.txt](LICENSE.txt).

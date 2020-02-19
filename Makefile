@@ -1,7 +1,7 @@
 SHELL=/bin/sh
 CWD := $(shell pwd)
 STACK_NAME ?= sls-inquisitor-test
-DEPLOYMENT_BUCKET ?= $(STACK_NAME)-deployment-$(AWS_REGION)
+DEPLOYMENT_BUCKET ?= $(STACK_NAME)-deployment-$(AWS_PROFILE)-$(AWS_REGION)
 
 ifneq (,$(PROVISIONED_INSTANCES))
 	OVERRIDES += ProvisionedInstances=$(PROVISIONED_INSTANCES)
@@ -21,8 +21,11 @@ OUTPUT_FILE := output.yml
 
 ifneq (,$(AWS_REGION))
 	AWS_ARGS += --region $(AWS_REGION)
-	BUCKET_LOCATION = --create-bucket-configuration LocationConstraint=$(AWS_REGION)
 	OUTPUT_FILE := output-$(AWS_REGION).yml
+	ifneq (us-east-1,$(AWS_REGION))
+		BUCKET_LOCATION = --create-bucket-configuration LocationConstraint=$(AWS_REGION)
+	endif
+
 endif
 
 
