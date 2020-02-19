@@ -9,7 +9,11 @@ Parameters:
   MemorySize:
     Type: Number
     Default: 128
-
+  ProvisionedInstances:
+    Type: Number
+    Default: 0
+Conditions:
+  ProvisionedInstancesSet: !Not [ !Equals [0, !Ref ProvisionedInstances]]
 Resources:
   RegionalRestApi:
     Type: AWS::Serverless::Api
@@ -82,8 +86,11 @@ Resources:
       CodeUri: sync-test-function
       MemorySize: !Ref MemorySize
       AutoPublishAlias: live
-      #ProvisionedConcurrencyConfig:
-      #  ProvisionedConcurrentExecutions: 20
+      ProvisionedConcurrencyConfig:
+        !If 
+          - ProvisionedInstancesSet
+          - ProvisionedConcurrentExecutions: !Ref ProvisionedInstances
+          - Ref: AWS::NoValue
       Events:
         RegionalApiGet:
           Type: Api

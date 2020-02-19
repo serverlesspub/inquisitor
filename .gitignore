@@ -1,5 +1,5 @@
 .env
-output.yml
+output*.yml
 web-config.yml
 _site
 node_modules
