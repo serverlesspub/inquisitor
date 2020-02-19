@@ -26,7 +26,7 @@ ifneq (,$(AWS_REGION))
 endif
 
 
-$(OUTPUT_FILE): template.yml sync-test-function/lambda.js
+$(OUTPUT_FILE): template.yml sync-test-function/lambda.js web-site/vendor/aws-sdk.min.js web-site/index.html
 	aws s3api head-bucket --bucket $(DEPLOYMENT_BUCKET) $(AWS_ARGS) || \
 		aws s3api create-bucket $(AWS_ARGS) --bucket $(DEPLOYMENT_BUCKET) $(BUCKET_LOCATION)
 	
@@ -38,31 +38,21 @@ deploy: $(OUTPUT_FILE)
 	--template-file $< \
 	--stack-name $(STACK_NAME) $(AWS_ARGS) $(PARAMETER_OVERRIDES)
 
+	aws cloudformation  describe-stacks \
+		--stack-name $(STACK_NAME) $(AWS_ARGS) \
+		--query Stacks[].Outputs[] --output text 
 logs:
 	sam logs --stack-name $(STACK_NAME) -n SyncTestFunction $(AWS_ARGS) 
 
-web-config.yml: $(OUTPUT_FILE)
-	aws cloudformation  describe-stacks \
-		--stack-name $(STACK_NAME) $(AWS_ARGS) \
-		--query Stacks[].Outputs[] --output text | awk '//{print $$1 ": " $$2}' > $@
-	echo "ApiKey: " $(shell key=`aws cloudformation  describe-stacks \
-		--stack-name $(STACK_NAME) $(AWS_ARGS) \
-		--query "Stacks[].Outputs[?OutputKey=='ApiKeyId'].OutputValue" --output text`; \
-		aws apigateway get-api-keys --query "items[?id=='$$key'].value" \
-			$(AWS_ARGS) --include-values --output text
-	) >> $@
 node_modules/aws-sdk/dist/aws-sdk.min.js:
 	npm install
 
-jekyll/vendor/aws-sdk.min.js: node_modules/aws-sdk/dist/aws-sdk.min.js
-	mkdir -p jekyll/vendor
+web-site/vendor/aws-sdk.min.js: node_modules/aws-sdk/dist/aws-sdk.min.js
+	mkdir -p web-site/vendor
 	cp $< $@
 
-web: web-config.yml jekyll/vendor/aws-sdk.min.js
-	jekyll serve -s jekyll -c $<
-
 clean:
-	rm -rf $(OUTPUT_FILE) web-config.yml jekyll/vendor
+	rm -rf output*.yml web-config.yml web-site/vendor
 
 undeploy:
 	aws cloudformation delete-stack --stack-name $(STACK_NAME) $(AWS_ARGS)

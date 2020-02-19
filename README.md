@@ -5,7 +5,6 @@ A simple app for testing request latency over API Gateway and Lambda functions.
 ## Prerequisites
 
 * npm
-* jekyll
 * make
 
 ## Usage
@@ -28,11 +27,8 @@ for example:
 make deploy STACK_NAME=perf-test AWS_PROFILE=claudia-test AWS_REGION=eu-west-2 PROVISIONED_INSTANCES=5
 ```
 
-2. start the local web site based on the deployed stack
-
-```
-make web STACK_NAME=perf-test
-```
+Upon successful deployment, the command will print out the URL of a web site you can open to trigger tests. The web site will also show a link
+to read out the API key value for tests involving the API Authorizers. (CloudFormation does not support reading out this value directly).
 
 ## Clean up
 
@@ -44,4 +40,5 @@ You can remove the deployed stack using `make undeploy` (make sure to add `STACK
 
 * modify [sync-test-function/lambda.js](sync-test-function/lambda.js) to change the Lambda function source code 
 * modify [template.yml](template.yml) to change the Lambda function settings
+* modify [web-site/index.html](web-site/index.html) to change the web site landing page 
 

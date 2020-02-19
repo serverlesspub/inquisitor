@@ -1,0 +1,22 @@
+body {
+  display: flex;
+  flex-direction:column;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.5ex;
+  margin-bottom: 0.5ex;
+}
+input {
+  flex-grow: 1; 
+  flex: 1;
+}
+input:disabled {
+  background-color: #eeeeee;
+}
+.info {
+  flex: 1;
+  padding-left: 1em;
+  padding-right: 1em;
+}

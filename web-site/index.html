@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css"/>
+	</head>
+<body>
+<h1>Inquisitor</h1>
+
+<div class="row">
+	Stack:  <a href="https://${Region}.console.aws.amazon.com/cloudformation/home?region=${Region}#/stacks/stackinfo?stackId=${StackId}" target="_blank">${StackId}</a>
+</div>
+
+<div class="row">
+	Region: <input name="region" readonly="true" disabled="true" value="${Region}" />
+</div>
+
+
+<div class="row">
+Cognito Identity Pool: <input name="cognitoIdentityPool" disabled="true" readonly="true" value="${IdentityPoolId}"/>
+</div>
+
+
+<div class="row">
+API Key value: <input name="apiKey" />
+<span class="info"> for <a  href="https://${Region}.console.aws.amazon.com/apigateway/home?region=${Region}#/api-keys/${ApiKeyId}" target="_blank">${ApiKeyId}</a>.</span>
+</div>
+
+<div class="row">
+Number of requests: <input type="number" name="requestCount" value="100"/>
+</div>
+
+
+<div class="row">
+Batch size: <input type="number" name="batchSize" value="100"/>
+</div>
+
+
+<div class="row">
+<button test-type="api" target="${RegionalApiUrl}" label="regional-api" >Regional API + Lambda</button>
+<button test-type="api" target="${EdgeApiUrl}" label="edge-api" >Edge API + Lambda</button>
+<button test-type="apiPost" target="${RegionalApiUrl}" label="regional-api" >Regional API + Lambda (POST)</button>
+<button test-type="lambda" target="${SyncTestFunction}" label="lambda" >Lambda</button>
+<button test-type="apikey" target="${RegionalKeyApiUrl}" label="regional-api-key" >Regional API + API Key + Lambda</button><br/>
+</div>
+
+<div role="reporter">
+</div>
+
+<script type="module" src="main.js"></script>
+<script src="vendor/aws-sdk.min.js"></script>
+</body>
+</html>

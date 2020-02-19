@@ -4,4 +4,5 @@ web-config.yml
 _site
 node_modules
 jekyll/vendor
+web-site/vendor
 package-lock.json
