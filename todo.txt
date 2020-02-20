@@ -1,5 +1,5 @@
-- [ ] publish the web site along with cloudformation, so people don't have to run jekyll locally
-- [ ] allow people to set region and profile directly when calling make, not in .env
-- [ ] allow setting provisioned concurrency and memory as parameters when calling make
+- [x] publish the web site along with cloudformation, so people don't have to run jekyll locally
+- [x] allow people to set region and profile directly when calling make, not in .env
+- [x] allow setting provisioned concurrency and memory as parameters when calling make
 - [ ] move instance reporting to a header, so the content can be anything
 - [ ] add tests to read files from the local lambda fs and stream back; compare to s3 load in the same region
