@@ -115,6 +115,12 @@ Resources:
             Method: get
             Path: /edge
             RestApiId: !Ref EdgeRestApi
+        EdgeApiPost:
+          Type: Api
+          Properties:
+            Method: post
+            Path: /edge
+            RestApiId: !Ref EdgeRestApi
         RegionalApiKeyGet:
           Type: Api
           Properties:
@@ -178,7 +184,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/deploy-to-s3
-        SemanticVersion: 1.0.0
+        SemanticVersion: 2.4.1
 
   SiteSource:
     Type: AWS::Serverless::Function
@@ -229,5 +235,5 @@ Metadata:
     ReadmeUrl: README-SAR.md 
     Labels: ['testing']
     HomePageUrl: https://github.com/serverlesspub/inquisitor
-    SemanticVersion: 1.0.1
+    SemanticVersion: 1.0.2
     SourceCodeUrl: https://github.com/serverlesspub/inquisitor

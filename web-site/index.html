@@ -21,7 +21,7 @@ Cognito Identity Pool: <input name="cognitoIdentityPool" disabled="true" readonl
 
 <div class="row">
 API Key value: <input name="apiKey" />
-<span class="info"> for <a  href="https://${Region}.console.aws.amazon.com/apigateway/home?region=${Region}#/api-keys/${ApiKeyId}" target="_blank">${ApiKeyId}</a>.</span>
+<a class="info" href="https://${Region}.console.aws.amazon.com/apigateway/home?region=${Region}#/api-keys/${ApiKeyId}" target="_blank">Get your API key here</a>
 </div>
 
 <div class="row">
@@ -37,7 +37,8 @@ Batch size: <input type="number" name="batchSize" value="100"/>
 <div class="row">
 <button test-type="api" target="${RegionalApiUrl}" label="regional-api" >Regional API + Lambda</button>
 <button test-type="api" target="${EdgeApiUrl}" label="edge-api" >Edge API + Lambda</button>
-<button test-type="apiPost" target="${RegionalApiUrl}" label="regional-api" >Regional API + Lambda (POST)</button>
+<button test-type="apiPost" target="${RegionalApiUrl}" label="regional-api-post" >Regional API + Lambda (POST)</button>
+<button test-type="apiPost" target="${EdgeApiUrl}" label="edge-api-post" >Edge API + Lambda (POST)</button>
 <button test-type="lambda" target="${SyncTestFunction}" label="lambda" >Lambda</button>
 <button test-type="apikey" target="${RegionalKeyApiUrl}" label="regional-api-key" >Regional API + API Key + Lambda</button><br/>
 </div>
