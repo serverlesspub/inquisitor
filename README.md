@@ -1,5 +1,7 @@
 # Serverless Inquisitor
 
+![](web-site/logo.png)
+
 A simple app for testing request latency over API Gateway and Lambda functions.
 
 The easiest way to deploy is directly from the [Serverless App Repository](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:145266761615:applications~inquisitor). Check out the stack outputs after deployment for the web site URL, and open that URL in the browser to run your tests.
