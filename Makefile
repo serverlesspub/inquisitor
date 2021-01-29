@@ -37,6 +37,8 @@ $(OUTPUT_FILE): template.yml sync-test-function/lambda.js web-site/vendor/aws-sd
 		--s3-bucket $(DEPLOYMENT_BUCKET) $(AWS_ARGS)
 
 deploy: $(OUTPUT_FILE)
+	chmod -R a+r web-site
+	chmod a+x web-site/vendor
 	aws cloudformation deploy --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 	--template-file $< \
 	--stack-name $(STACK_NAME) $(AWS_ARGS) $(PARAMETER_OVERRIDES)

@@ -1,4 +1,4 @@
-/*global exports*/
+/*global exports */
 exports.handler = async function (request, context) {
 	const content = Object.assign({
 		ts: Date.now(),

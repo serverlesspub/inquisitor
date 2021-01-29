@@ -4,6 +4,10 @@ Description: >
   between client devices, API Gateway and Lambda functions
 Transform: AWS::Serverless-2016-10-31
 Parameters:
+  AppVersion:
+    Type: String
+    Default: "1.2.0"
+    Description: Deployment app version
   StageName:
     Type: String
     Default: "test"
@@ -11,6 +15,8 @@ Parameters:
   MemorySize:
     Type: Number
     Default: 128
+    MinValue: 128
+    MaxValue: 3008
     Description: Memory limit for the test Lambda function
   ProvisionedInstances:
     Type: Number
@@ -46,7 +52,7 @@ Resources:
 
   ApiUsagePlan:
     Type: 'AWS::ApiGateway::UsagePlan'
-    DependsOn: 
+    DependsOn:
       - RegionalRestApiStage
       - EdgeRestApiStage
     Properties:
@@ -65,7 +71,7 @@ Resources:
 
   ApiKey:
     Type: 'AWS::ApiGateway::ApiKey'
-    DependsOn: 
+    DependsOn:
       - RegionalRestApiStage
       - EdgeRestApiStage
     Properties:
@@ -83,6 +89,25 @@ Resources:
       KeyType: API_KEY
       UsagePlanId: !Ref ApiUsagePlan
 
+  RegionalHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref StageName
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - OPTIONS
+          - POST
+        AllowHeaders:
+          - Content-Type
+          - X-Amz-Date
+          - Authorization
+          - X-Api-Key
+        AllowOrigins:
+          - '*'
+        MaxAge: 600
+
+
   SyncTestFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -92,7 +117,7 @@ Resources:
       MemorySize: !Ref MemorySize
       AutoPublishAlias: live
       ProvisionedConcurrencyConfig:
-        !If 
+        !If
           - ProvisionedInstancesSet
           - ProvisionedConcurrentExecutions: !Ref ProvisionedInstances
           - Ref: AWS::NoValue
@@ -129,6 +154,18 @@ Resources:
             RestApiId: !Ref RegionalRestApi
             Auth:
               ApiKeyRequired: true
+        RegionalHttpApiPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RegionalHttpApi
+            Method: post
+            Path: /regional
+        RegionalHttpApiGet:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RegionalHttpApi
+            Method: get
+            Path: /regional
 
   IdentityPool:
     Type: "AWS::Cognito::IdentityPool"
@@ -138,24 +175,24 @@ Resources:
   CognitoUnAuthorizedRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
-            Principal: 
+            Principal:
               Federated: "cognito-identity.amazonaws.com"
-            Action: 
+            Action:
               - "sts:AssumeRoleWithWebIdentity"
             Condition:
-              StringEquals: 
+              StringEquals:
                 "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
               "ForAnyValue:StringLike":
                 "cognito-identity.amazonaws.com:amr": unauthenticated
       Policies:
         - PolicyName: "CognitoUnauthorizedPolicy"
-          PolicyDocument: 
+          PolicyDocument:
             Version: "2012-10-17"
-            Statement: 
+            Statement:
               - Effect: "Allow"
                 Action:
                   - "cognito-sync:*"
@@ -193,7 +230,7 @@ Resources:
         - !GetAtt DeploymentLayer.Outputs.Arn
       CodeUri: web-site/
       AutoPublishAlias: live
-      Runtime: python3.6 
+      Runtime: python3.6
       Handler: deployer.resource_handler
       Timeout: 600
       Policies:
@@ -217,7 +254,9 @@ Resources:
           RegionalApiUrl: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
           RegionalKeyApiUrl: !Sub "https://${RegionalRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional-key"
           EdgeApiUrl: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/edge"
+          RegionalHttpApiUrl: !Sub "https://${RegionalHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
           SyncTestFunction: !Ref SyncTestFunction.Alias
+          AppVersion: !Ref AppVersion
 
 Outputs:
   WebSiteUrl:
@@ -225,15 +264,15 @@ Outputs:
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: inquisitor 
+    Name: inquisitor
     Description: >
       Serverless Inquisitor, a simple app for testing latency
       between client devices, API Gateway and Lambda functions
     Author: Gojko Adzic
-    SpdxLicenseId: MIT 
+    SpdxLicenseId: MIT
     LicenseUrl: LICENSE.txt
-    ReadmeUrl: README-SAR.md 
+    ReadmeUrl: README-SAR.md
     Labels: ['testing']
     HomePageUrl: https://github.com/serverlesspub/inquisitor
-    SemanticVersion: 1.1.0
+    SemanticVersion: !Ref AppVersion
     SourceCodeUrl: https://github.com/serverlesspub/inquisitor

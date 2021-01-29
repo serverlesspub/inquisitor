@@ -3,44 +3,37 @@
 		<link rel="stylesheet" href="style.css"/>
 	</head>
 <body>
-<h1>Inquisitor</h1>
-
+	<h1>Inquisitor ${AppVersion}</h1>
 <div class="row">
 	Stack:  <a href="https://${Region}.console.aws.amazon.com/cloudformation/home?region=${Region}#/stacks/stackinfo?stackId=${StackId}" target="_blank">${StackId}</a>
 </div>
-
 <div class="row">
 	Region: <input name="region" readonly="true" disabled="true" value="${Region}" />
 </div>
-
-
 <div class="row">
 Cognito Identity Pool: <input name="cognitoIdentityPool" disabled="true" readonly="true" value="${IdentityPoolId}"/>
 </div>
-
-
 <div class="row">
 API Key value: <input name="apiKey" />
 <a class="info" href="https://${Region}.console.aws.amazon.com/apigateway/home?region=${Region}#/api-keys/${ApiKeyId}" target="_blank">Get your API key here</a>
 </div>
-
 <div class="row">
-Number of requests: <input type="number" name="requestCount" value="100"/>
+Number of total requests: <input type="number" name="requestCount" value="1000"/>
+</div>
+<div class="row">
+Max parallel requests: <input type="number" name="batchSize" value="6"/>
 </div>
 
 
 <div class="row">
-Batch size: <input type="number" name="batchSize" value="100"/>
-</div>
-
-
-<div class="row">
-<button test-type="api" target="${RegionalApiUrl}" label="regional-api" >Regional API + Lambda</button>
-<button test-type="api" target="${EdgeApiUrl}" label="edge-api" >Edge API + Lambda</button>
-<button test-type="apiPost" target="${RegionalApiUrl}" label="regional-api-post" >Regional API + Lambda (POST)</button>
-<button test-type="apiPost" target="${EdgeApiUrl}" label="edge-api-post" >Edge API + Lambda (POST)</button>
+<button test-type="api" target="${RegionalApiUrl}" label="regional-api" >Regional REST API + Lambda</button>
+<button test-type="api" target="${EdgeApiUrl}" label="edge-api" >Edge REST API + Lambda</button>
+<button test-type="apiPost" target="${RegionalApiUrl}" label="regional-api-post" >Regional REST API + Lambda (POST)</button>
+<button test-type="apiPost" target="${EdgeApiUrl}" label="edge-api-post" >Edge REST API + Lambda (POST)</button>
 <button test-type="lambda" target="${SyncTestFunction}" label="lambda" >Lambda</button>
 <button test-type="apikey" target="${RegionalKeyApiUrl}" label="regional-api-key" >Regional API + API Key + Lambda</button><br/>
+<button test-type="api" target="${RegionalHttpApiUrl}" label="regional-http-api" >Regional HTTP API + Lambda</button><br/>
+<button test-type="apiPost" target="${RegionalHttpApiUrl}" label="regional-http-api" >Regional HTTP API + Lambda (POST)</button><br/>
 </div>
 
 <div role="reporter">
