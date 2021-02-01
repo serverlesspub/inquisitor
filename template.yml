@@ -4,10 +4,6 @@ Description: >
   between client devices, API Gateway and Lambda functions
 Transform: AWS::Serverless-2016-10-31
 Parameters:
-  AppVersion:
-    Type: String
-    Default: "1.2.0"
-    Description: Deployment app version
   StageName:
     Type: String
     Default: "test"
@@ -256,7 +252,7 @@ Resources:
           EdgeApiUrl: !Sub "https://${EdgeRestApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/edge"
           RegionalHttpApiUrl: !Sub "https://${RegionalHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/regional"
           SyncTestFunction: !Ref SyncTestFunction.Alias
-          AppVersion: !Ref AppVersion
+          AppVersion: 1.2.0
 
 Outputs:
   WebSiteUrl:
@@ -274,5 +270,5 @@ Metadata:
     ReadmeUrl: README-SAR.md
     Labels: ['testing']
     HomePageUrl: https://github.com/serverlesspub/inquisitor
-    SemanticVersion: !Ref AppVersion
+    SemanticVersion: 1.2.0
     SourceCodeUrl: https://github.com/serverlesspub/inquisitor
